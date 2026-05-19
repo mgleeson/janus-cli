@@ -19,24 +19,32 @@
 ## Environment options:
 ##  DRYRUN=1       Preview changes without modifying anything.
 ##  RENAME_ROOT=1  Allow the root directory itself to be renamed.
+##  EXCLUDE_GIT=0  Include .git directories. By default, .git is skipped.
 ####################################################################
 set -euo pipefail
 
-old="${1:-}"
-new="${2:-}"
-root="${3:-.}"
-
-dryrun="${DRYRUN:-0}"
-rename_root="${RENAME_ROOT:-0}"
-
-if [[ -z "$old" ]]; then
-    echo "Error: old string must not be empty" >&2
+if [[ $# -lt 2 || $# -gt 3 ]]; then
+    echo "Error: expected 2 or 3 arguments" >&2
     echo "Usage: $0 OLD NEW [ROOT]" >&2
     echo "Example: $0 oldtext newtext ." >&2
     echo
     echo "Optional:"
     echo "  DRYRUN=1       Preview changes without modifying anything"
     echo "  RENAME_ROOT=1  Allow the root directory itself to be renamed"
+    echo "  EXCLUDE_GIT=0  Include .git directories. By default, .git is skipped."
+    exit 1
+fi
+
+old="$1"
+new="$2"
+root="${3:-.}"
+
+dryrun="${DRYRUN:-0}"
+rename_root="${RENAME_ROOT:-0}"
+exclude_git="${EXCLUDE_GIT:-1}"
+
+if [[ -z "$old" ]]; then
+    echo "Error: old string must not be empty" >&2
     exit 1
 fi
 
@@ -59,6 +67,15 @@ export NEW="$new"
 echo "Root: $root"
 echo "Replacing content: '$old' -> '$new'"
 echo "Renaming files and directories containing: '$old'"
+
+if [[ "$exclude_git" != "0" ]]; then
+    echo "Skipping .git directories"
+fi
+
+if [[ "$(basename -- "$root")" == *"$old"* && "$rename_root" != "1" ]]; then
+    echo "Note: root directory name matches '$old' but will not be renamed unless RENAME_ROOT=1"
+fi
+
 echo
 
 ###################################################
@@ -66,6 +83,14 @@ echo
 ###################################################
 
 while IFS= read -r -d '' file; do
+    if [[ "$exclude_git" != "0" ]]; then
+        case "$file" in
+            */.git|*/.git/*)
+                continue
+                ;;
+        esac
+    fi
+
     # grep -I skips binary files.
     # grep -F treats the search string literally, not as a regex.
     if grep -IqF -- "$old" "$file"; then
@@ -88,6 +113,14 @@ echo
 ###################################################
 
 while IFS= read -r -d '' path; do
+    if [[ "$exclude_git" != "0" ]]; then
+        case "$path" in
+            */.git|*/.git/*)
+                continue
+                ;;
+        esac
+    fi
+
     # By default, do not rename the root directory itself.
     if [[ "$path" == "$root" && "$rename_root" != "1" ]]; then
         continue
