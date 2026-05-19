@@ -134,14 +134,14 @@ while IFS= read -r -d '' path; do
         continue
     fi
 
-    newbase="${base//"$old"/$new}"
+    newbase="${base//"$old"/"$new"}"
     target="$dir/$newbase"
 
     if [[ "$path" == "$target" ]]; then
         continue
     fi
 
-    if [[ -e "$target" ]]; then
+    if [[ -e "$target" || -L "$target" ]]; then
         echo "Skipping rename because target already exists:"
         echo "  Source: $path"
         echo "  Target: $target"
