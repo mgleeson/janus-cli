@@ -6,11 +6,15 @@
 - filenames
 - directory names
 
-It is intended for controlled site or project renames, such as changing an old hostname to a new hostname across Apache vhost files, webroots, and application config files.
+It is intended for controlled site or project renames, such as changing an old virtual host to a new hostname across Apache vhost files, webroots, and application config files.
 
-## Safety warning
+## Safety warning!
 
-This script can modify many files and paths recursively. Always run a dry run first and keep backups before running it against important locations such as `/etc`, `/var/www`, or production application directories.
+This script can and will do **"very bad things"** to the files you love if you do not use it correctly, and cannot be guaranteed to not do so even if you do. 
+This script could possibly call your cat terrible names, even if you do not have a cat. This script can modify many files and paths recursively. ALWAYS backup first, perform a dry run, and never run in production. It surely goes without saying to measure thrice and cut once before running it against important locations, such as `/var/www` or production application directories, and unless you really know what you're doing *absolutely avoid all system locations*.
+
+THIS SCRIPT IS PROVIDED ON AN "AS IS" BASIS WITHOUT ANY WARRANTIES OF ANY KIND. BY USING THIS SCRIPT, THE USER CONFIRMS THEY HAVE CONDUCTED THEIR OWN DUE DILIGENCE TO VERIFY ITS SUITABILITY AND SAFETY. THE USER VOLUNTARILY ACCEPTS FULL RISK ASSUMPTION FOR ANY DAMAGES OR DATA LOSS ARISING FROM ITS USE.
+
 
 ## Requirements
 
@@ -171,3 +175,7 @@ sudo systemctl reload apache2
 ## Limitations
 
 `janus-cli` performs literal string replacement in text files and path basenames. It does not understand application semantics, database contents, symlinks that point to renamed files, external service configuration, DNS, SSL certificates, cron jobs, or reverse proxy rules.
+
+## License
+
+This script is licenced under the [GNU Affero General Public License v3.0](https://github.com/mgleeson/janus-cli/blob/main/LICENSE)
